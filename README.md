@@ -1,58 +1,59 @@
 # Ray-Casting
 
-I will explain here the formulas that I have used to implement the ray-casting. This raycast has been made in order to create a 3D game [Cub3D](https://github.com/Saxsori/cub3d). The project still in progress ⚙️🛠.
+Raycasting'i uygulamak için kullandığım formülleri burada açıklayacağım. Bu raycast, Cub3D adlı 3D bir oyun oluşturmak için yapılmıştır. Proje hala devam etmektedir ⚙️🛠.
 
-Note: `Im NoT DoNe yEt wItH KeYs .. AnD YES tHe PaLyEr cAn wAlK ThRouGh tHe WaLLs` 🧟‍♀️       [[DONE ✅]](https://github.com/Saxsori/ray-cast/commit/605acb75175820553e6d988fbf837329ed6a482b)
+Not: Henüz tuşlarla ilgili bitmiş değilim .. Ve evet, oyuncu duvarların içinden geçebilir 🧟‍♀️
+
+Eğer raycasting veya oyun geliştirmeyle ilgili herhangi bir konuda spesifik sorularınız varsa, sormaktan çekinmeyin!
 
 ## Introduction
-The idea of the raycasting in general is easy and the formulas isn't that complicated. I will explain what kind of calaculation I used to create, draw, and move around the walls.
 
-Well let me firstly tell you what are the math concepts that I have used in the formulas. [Right triangle trigonometry (SOHCAHTOA)](https://www.mathsisfun.com/algebra/sohcahtoa.html), and [Vectors: Components(X , Y), Quantity (magnitude and direction)](https://www.varsitytutors.com/hotmath/hotmath_help/topics/components-of-a-vector). 
+Raycasting'in genel fikri basittir ve formüller çok karmaşık değildir. Duvarları oluşturmak, çizmek ve etrafında hareket etmek için kullandığım hesaplamaları açıklayacağım.
+
+Öncelikle, formüllerde kullandığım matematik kavramlarını size anlatayım.. [Right triangle trigonometry (SOHCAHTOA)](https://www.mathsisfun.com/algebra/sohcahtoa.html), and [Vectors: Components(X , Y), Quantity (magnitude and direction)](https://www.varsitytutors.com/hotmath/hotmath_help/topics/components-of-a-vector). 
 
 ## Main Idea
-In order to explain the main idea of the formulas, let's say that we have the player's postion on a 2D map (x, y) coordinates. `The player is looking at the wall in front of him (NORTH), let's say the looking angle is 90 which is straight to north`. The distance from his coordinate to the point of the wall called a ray. Depending on the player's [FOV](https://www.techtarget.com/whatis/definition/field-of-view-FOV) the number of the rays will be decided. `If the FOV is 120 then his looking width will be 60 degrees to the left and 60 degrees to the right from the looking angle (90)`.
+
+Formüllerin ana fikrini açıklamak için, oyuncunun 2D harita üzerindeki konumunu (x, y) koordinatlarıyla varsayalım. "Oyuncu, kendisinin önündeki duvara (KUZEY) bakıyor, diyelim ki bakış açısı 90 ve doğrudan kuzeye doğru bakıyor." Kendi koordinatından duvarın noktasına olan mesafe bir ışını temsil eder. Oyuncunun Görüş Açısı (FOV)'na bağlı olarak ışınların sayısı belirlenecektir. "Eğer FOV 120 ise, bakış genişliği bakış açısından (90) sola 60 derece ve sağa 60 derece olacak şekilde 60 derece olur".
 
 ![](https://github.com/Saxsori/ray-cast/blob/main/images/5.png)
 
-#### Well where are we going to use the vectors?
+#### Vektörleri nerede kullanacağımızı belirtelim.
 
-Using the player's coordinate and his looking angle we can calculate the ray's vector `(X and Y components)`. Then calculate the offset `(gridline outlier)` the points where the rays could hit vertically and horizontally till the point of the wall.
+Oyuncunun koordinatını ve bakış açısını kullanarak, ışının vektörünü (X ve Y bileşenleri) hesaplayabiliriz. Ardından, ışınların dikey ve yatay olarak duvara ulaşabileceği noktaların ofsetini (ızgara çizgisi aykırısı) hesaplayabiliriz
 
-## GridLine Hit Checkers
-Each time the ray will hit a grid line horizontally or vertically, that point actually should be the position where we can check if it's a wall or not. To do that we firstly need to know how to calculate the ray's vector using the player's coordinates, then add a specfic value `(parameters)` to hit the first grid line, then continually add a constant value to hit each grid line till the wall, these constant values called `(Grid Offsets)`.
+## GridLine Hit Checkers (Izgara Çizgisi Kontrol Edicileri)
+Her bir ışın, yatay veya dikey olarak bir ızgara çizgisine çarptığında, aslında duvarın olup olmadığını kontrol etmemiz gereken nokta olmalıdır. Bunun için öncelikle oyuncunun koordinatlarından hareketle ışının vektörünü hesaplamamız gerekiyor, ardından ilk ızgara çizgisine çarpmak için belirli bir değeri (parametreleri) ekliyoruz ve ardından duvara ulaşmak için her bir ızgara çizgisine çarpmak için sürekli bir sabit değeri ekliyoruz. Bu sabit değerlere de (Izgara Ofsetleri) denir.
 
 ![alt text](https://github.com/Saxsori/ray-cast/blob/main/images/1.png)
 
-Horizontal Grid Lines is the (NORTH & SOUTH), or `the upper and the lower sides of a 2d map`. Vertical Grid Lines is the (WEST & EAST), `or the left and the right sides of a 2d map`.
-Depending on the looking angle of the player we can decide where the ray is actually hitting vertically `(left or right)` and horizontally `(up or down)`. Before that We actually need to understand how we can calculate `the ray's line and the ray's vector`.
+Yatay Izgara Çizgileri, (KUZEY ve GÜNEY) veya 2D haritanın üst ve alt kenarlarıdır. Dikey Izgara Çizgileri ise (BATI ve DOĞU) veya 2D haritanın sol ve sağ kenarlarıdır.
+Oyuncunun bakış açısına bağlı olarak, ışının aslında dikey olarak nereye çarptığını (sol veya sağ) ve yatay olarak nereye çarptığını (yukarı veya aşağı) belirleyebiliriz. Bunun öncesinde aslında ışının çizgisi ve ışının vektörünü nasıl hesaplayabileceğimizi anlamamız gerekiyor.
 
-First thing to know in order to get the ray's vector (X and Y components) `ray Y and ray X`, is that we can use the rule of the right triangle.
-
+Işının vektörünü (X ve Y bileşenleri) ışın Y ve ışın X elde etmek için bilinmesi gereken ilk şey, sağ üçgenin kurallarını kullanabileceğimizdir.
 ### Example
-This is in example on how the ray's points should look like when it hits the grid lines. I used [desmos](https://www.desmos.com/calculator/rhdvs6uffp) to plot them out. And I added the offsets and the parameter manually for the looking angle 60 and the position (77, 77). `The red point is the player's position, the orange points are the upper side, the green points are the lower side, the black points are the left side, and the purple points are the right side`. 
+Bu, ışının ızgara çizgilerine çarptığında nasıl görüneceğiyle ilgili bir örnektir. Onları çizmek için desmos kullandım. Ve ofsetleri ve parametreyi manuel olarak ekledim, bakış açısı 60 ve pozisyon (77, 77) için. Kırmızı nokta oyuncunun pozisyonunu, turuncu noktalar üst tarafı, yeşil noktalar alt tarafı, siyah noktalar sol tarafı ve mor noktalar sağ tarafı temsil eder.
 
 <img width="635" alt="Screen Shot 2022-08-27 at 7 37 59 AM" src="https://user-images.githubusercontent.com/92129820/187012948-2590fd02-a71b-461b-bd28-6a7101aa5ac4.png">
 
-### Horizontal Gridline
+### Yatay Izgara Çizgisi
 
-To calculate the horizontal gridline checker formulas. We can follow these steps :
+Yatay Izgara Çizgisi Kontrol Edici Formülleri hesaplamak için şu adımları izleyebiliriz:
 
-- The ray Y point should be the player's Y coordinate.
+Işın Y noktası, oyuncunun Y koordinatı olmalıdır.
 
-- Then to get the ray X point we can use the right triangle rules `(SOHCAHTOA)`. The ray line would be Hypotenuse, the Opposite is the difference between the player Y coordinate and Ray Y point and the Adjacent is the ray X component which we are trying to find. So ray X is `opposite (ray Y) / tan(looking angle)`.
-
+Ardından ışın X noktasını elde etmek için sağ üçgen kurallarını (SOHCAHTOA) kullanabiliriz. Işın hattı Hipotenüs olacak, Karşıt ise oyuncunun Y koordinatı ile Işın Y noktası arasındaki fark olacak ve Yanlış ise aradığımız ışın X bileşeni olacak. Dolayısıyla ışın X, karşıt (ışın Y) / tan(bakış açısı) olarak hesaplanır.
  ![alt text](https://github.com/Saxsori/ray-cast/blob/main/images/4.png) 
- 
-To scale them to the size of the grid (64) :
 
-- The ray Y: you should firstly scale the player's Y point to 64 unit. `((pY / 64) * 64);`
-- The ray X: should had the player's X coordinate. `(+ pX);`
+Bunları ızgara boyutuna (64) ölçeklendirmek için:
 
-To make them hitting the next horizontal grid line we need to add a parameter :
+Işın Y: Öncelikle oyuncunun Y noktasını 64 birime ölçeklendirmeniz gerekmektedir. ((pY / 64) * 64);
+Işın X: Oyuncunun X koordinatını eklemelisiniz. (+ pX);
+Bir sonraki yatay ızgara çizgisine çarpmalarını sağlamak için bir parametre eklememiz gerekmektedir:
 
-- The ray Y point should had the distance from the player position to the next horizontal grid line `(the difference between the player Y coordinate and the next Y line)` so that it can hit the next horizontal gridline.
+Işın Y noktasına, oyuncu pozisyonundan bir sonraki yatay ızgara çizgisine olan mesafeyi eklemeniz gerekmektedir (oyuncu Y koordinatı ile bir sonraki Y çizgisi arasındaki fark), böylece bir sonraki yatay ızgara çizgisine çarpabilir.
 
-#### The formula when the player is looking (North) should finally look like this ..
+#### Oyuncu (Kuzey) yönüne baktığında formül son olarak şu şekilde olmalıdır:
 
 ```ruby
 rayY = ((pY / 64) * 64) + (Y.line - pY);
@@ -60,7 +61,7 @@ rayX = (pY - rayY) / -tan(looking angle) + pX;
 ```
 ![](https://github.com/Saxsori/ray-cast/blob/main/images/7.png)
 
-#### If the player was looking (South) the direction is horizontally different now so the signs will be only changed ..
+####  Eğer oyuncu (Güney) yönüne bakıyorsa, yön yatayda farklı olduğu için işaretler sadece değişecektir. Aşağıdaki gibi güncellenir:
 
 ```ruby
 rayY = ((pY / 64) * 64) - (Y.line - pY);
@@ -70,11 +71,11 @@ rayX = (pY - rayY) / -tan(looking angle) + pX;
 
 ### Vertical Gridline 
 
-To check the vertical grid line hit, it will be the same but opposite. The calculation will depend only on the ray Y where it could hit the Y lines. Previously on the horizontal checkers it was depending on the ray X where it can hit the X lines.
+Dikey ızgara çizgisi çarpmasını kontrol etmek için, aynı mantığı kullanırız ancak zıttıdır. Hesaplama sadece ışın Y'ye bağlı olacaktır, çünkü ışın Y noktasına çarpabilecek Y çizgilerine bağlıdır. Daha önce yatay kontrol edicilerde ışın X'ye bağlıydı, çünkü X çizgilerine çarpabiliyordu.
 
-So the formula will be changed to this ..
+Bu nedenle formül şu şekilde değişir:
 
-#### If the player was looking to the East.
+#### Eğer oyuncu doğuya bakıyorsa, formül şu şekilde olacaktır:
 
 ```ruby
 rayX = ((pX / 64) * 64) + (X.line - pX);
@@ -82,8 +83,7 @@ rayY = (pX - rayX) / -tan(looking angle) + pY;
 ```
 ![](https://github.com/Saxsori/ray-cast/blob/main/images/9.png)
 
-#### If the player was looking to the west the direction is now different so the signs will be changed again.
-
+#### Eğer oyuncu batıya bakıyorsa, yön farklı olacağından işaretler yine değişir.
 ```ruby
 rayX = ((pX / 64) * 64) - (X.line - pX);
 rayY = (pX - rayX) / -tan(looking angle) + pY;
@@ -92,12 +92,13 @@ rayY = (pX - rayX) / -tan(looking angle) + pY;
 
 ### Gridline Offset
 
-Offset basically means the amount or a value by which the calculation is out of line or where it could hit the outlier. And here it means the value to add each time to hit the next grid line. So, we want the rays to hit the grid lines not more not a less. Therefore, to calculate these values we are going to use `SOHCAHTOA` again.
+
+Ofset, temel olarak hesaplamanın hatadan veya aykırı noktadan çıktığını veya hangi noktaya çarpabileceğini belirtmek için kullanılan bir miktar veya değeri ifade eder. Burada, bir sonraki ızgara çizgisine çarpmak için her seferinde eklemek istediğimiz değeri ifade eder. Yani, ışınların tam olarak ızgara çizgilerine çarpmasını istiyoruz. Bu nedenle, bu değerleri hesaplamak için tekrar SOHCAHTOA kullanacağız.
 
 ![](https://github.com/Saxsori/ray-cast/blob/main/images/6.png)
 
-#### If the player was looking North
-The Y offset will be the size of the grid (64). So it can hit the next horizontal line. And to get the X offset we can use `(SOHCAHTOA) -> Y offset * Tan`.
+#### Eğer oyuncu Kuzey'e bakıyorsa
+Y ofseti ızgara boyutu (64) olacaktır. Bu şekilde bir sonraki yatay çizgiye çarpabilir. X ofsetini elde etmek için (SOHCAHTOA) -> Y ofseti * Tan formülünü kullanabiliriz.
 
 ```ruby
 oY = 64;
@@ -106,9 +107,8 @@ oX = oY * tan(looking angle);
 
 ![](https://github.com/Saxsori/ray-cast/blob/main/images/H-U.png)
 
-#### If the player was looking South
-
-The offsets will be the same but only the direction of the Y will be changed..
+#### Eğer oyuncu Güney'e bakıyorsa, 
+ofsetler aynı olacak, sadece Y'nin yönü değişecektir.
 
 ```ruby
 oY = -64;
@@ -117,9 +117,8 @@ oX = oY * tan(looking angle);
 
 ![](https://github.com/Saxsori/ray-cast/blob/main/images/H-D.png)
 
-#### If the player was looking East
-
-The X offset will be the size of the grid (64). So it can hit the next vertical line. And to get the Y offset we can use `(SOHCAHTOA) -> X offset * Tan`.
+#### Eğer oyuncu doğuya bakıyorsa, 
+X ofseti ızgara boyutu (64) olacaktır. Bu şekilde bir sonraki dikey çizgiye çarpabilir. Y ofsetini elde etmek için (SOHCAHTOA) -> X ofseti * Tan formülünü kullanabiliriz.
 
 ````ruby
 oX = 64;
@@ -128,9 +127,8 @@ oY = oX * tan(looking angle);
 
 ![](https://github.com/Saxsori/ray-cast/blob/main/images/V-R.png)
 
-#### If the player was looking West
-
-The offsets will be the same but only the direction of the X will be changed..
+#### Eğer oyuncu batıya bakıyorsa
+ ofsetler aynı olacak, sadece X'in yönü değişecektir.
 
 ```ruby
 oX = -64;
@@ -139,8 +137,7 @@ oY = oX * tan(looking angle);
 
 ![](https://github.com/Saxsori/ray-cast/blob/main/images/V-L.png)
 
-
-Then we do the wall checking loop, in the loop we should add the offset values to the ray values till it hit the wall.
+Sonra, duvar kontrol döngüsünü gerçekleştiririz. Döngüde, ışın değerlerine ofset değerlerini ekleriz, böylece duvara çarpıncaya kadar devam eder.
 
 ```ruby
 while (!wall)
@@ -150,8 +147,7 @@ while (!wall)
 }
 ```
 
-For Example, let's say `the player's looking angle is 60. He's looking North to the East. Vertically the line should hit the right side and horizontally should hit the upper side`. So the formulas that we are going to use are ..
-
+Örneğin, diyelim ki oyuncunun bakış açısı 60'tır. Kuzey'e doğru Doğu'ya bakıyor. Dikey olarak çizgi sağ tarafa çarpmalı ve yatay olarak üst tarafa çarpmalıdır. Kullanacağımız formüller ise şunlardır:
 ```ruby
 rayY = ((pY / 64) * 64) + (Y.line - pY);
 rayX = (pY - rayY) / -tan(looking angle) + pX;
@@ -159,7 +155,7 @@ oX = 64;
 oY = oX * tan(looking angle);
 ```
 
-And vertically 
+Ve dikey olarak, çevirsek:
 
 ```ruby
 rayX = ((pX / 64) * 64) + (X.line - pX);
@@ -167,21 +163,19 @@ rayY = (pX - rayX) / -tan(looking angle) + pY;
 oY = 64;
 oX = oY * tan(looking angle);
 ```
-Now we can do the wall checking loop (adding the offsets to the rays points) till it hit the wall. Then calculate the ray's line for the vertical check and the horizontal check and choose the shortest one (first one hit the wall). 
-
+Şimdi duvar kontrol döngüsünü yapabiliriz (ışın noktalarına ofsetleri ekleyerek), duvara çarpıncaya kadar devam ederiz. Ardından dikey kontrol ve yatay kontrol için ışının hattını hesaplayarak en kısa olanı seçeriz (duvara ilk çarpan).
 ![](https://github.com/Saxsori/ray-cast/blob/main/images/3.png)
 
-`So depending on the looking angle we can choose the right formulas to get the hitting points till the wall`.
+Böylece bakış açısına bağlı olarak duvara kadar ulaşan noktaları elde etmek için doğru formülleri seçebiliriz.
 
-## Drawing the walls
+## Duvarları çizme
 
-Create a loop to check which grid line checker will hit the wall firstly, the vertical or the horizontal one. Then calculate the distance between the point where the ray hit the wall and the position of the player, and this should be the length of the ray line. You can easily use the [pythagorean rule](https://courses.lumenlearning.com/waymakercollegealgebra/chapter/distance-in-the-plane/) to calculate the length of the line between two points. $distance = \sqrt{{(X2 - X1)}^2 + {(Y2 - Y1)}^2}$
+Duvara ilk çarpanın dikey mi yoksa yatay mı ızgara çizgisi kontrol edicisinin olduğunu kontrol etmek için bir döngü oluşturun. Ardından, ışının duvara çarptığı nokta ile oyuncunun konumu arasındaki mesafeyi hesaplayın ve bu ışın hattının uzunluğu olmalıdır. Bu hesaplama için mesafeyi hesaplamak için Pythagoras formülünü kullanabilirsiniz.[pythagorean rule](https://courses.lumenlearning.com/waymakercollegealgebra/chapter/distance-in-the-plane/) to calculate the length of the line between two points. $distance = \sqrt{{(X2 - X1)}^2 + {(Y2 - Y1)}^2}$
 
-`Save this value (the length of the ray) for drawing but firstly let's explain how the width and the height of the screen should be scaled. How it should look like !`
 
-### Width of the Screen
-The width of the screen will be fixed. You can choose the width of the screen. As you cann see the width of the screen is the width of the image that the player can see. The size of the width will be the number of the rays. And the angle between each ray should be the `FOV / width`.
-
+Bu değeri (ışının uzunluğunu) çizim için kaydedin, ancak öncelikle ekranın genişliği ve yüksekliğinin nasıl ölçeklendirilmesi gerektiğini açıklayalım. Nasıl görünmesi gerektiği hakkında bilgi verelim!
+### Ekranın Genişliği
+Ekranın genişliği sabit olacak. Ekran genişliğini istediğiniz şekilde seçebilirsiniz. Ekran genişliği, oyuncunun görebileceği görüntünün genişliğidir. Genişlik, ışınların sayısı olacaktır. Her bir ışın arasındaki açı, FOV / genişlik olmalıdır.
 `````ruby
 angle = looking_angle - (FOV / 2);
 while (--WIDTH)
@@ -191,22 +185,21 @@ while (--WIDTH)
 }
 `````
 
-### Height of the Screen
-The height of the screen will be fixed also. The height of the screen should the Max height that the wall could reach, you can choose your own size. To get the height of each wall, you should `multiply the grid size (64) by the screen height divide by the ray length`.
-
+### Ekranın Yüksekliği
+Ekranın yüksekliği de sabit olacak. Ekran yüksekliği, duvarın ulaşabileceği maksimum yüksekliktir ve istediğiniz bir değeri seçebilirsiniz. Her duvarın yüksekliğini elde etmek için ızgara boyutunu (64) ekran yüksekliğiyle çarpıp ışın uzunluğuna bölmelisiniz.
 ````ruby
 wall_height = (64 * HEIGHT) / ray_len;
 ````
-### Drawing
-Okay let's wrap this all up. Using all of these ideas we can finally end up with these steps. Since the number of rays is the size of the width we can create this loop, inside the loop we should do the following steps..
+## Çizim
+Tamam, hepsini bir araya getirelim. Tüm bu fikirleri kullanarak sonunda şu adımları takip edebiliriz. Işınların sayısı genişlik boyutu olduğundan bu döngüyü oluşturabiliriz, döngü içinde aşağıdaki adımları gerçekleştirmeliyiz.
 
-1- Do the gridline check and get the final ray points.
+1- Izgara çizgisi kontrolünü yapın ve son ışın noktalarını elde edin.
 
-2- Calculate the wall height using the HEIGHT of the screen and the ray length.
+2- Duvar yüksekliğini, ekranın YÜKSEKLİĞİ ve ışın uzunluğunu kullanarak hesaplayın.
 
-3- Calculate the starting point and the ending point of the walls.
+3- Duvarların başlangıç noktasını ve bitiş noktasını hesaplayın.
 
-4- Start drawing.
+4- Çizmeye başlayın.
 
 ````ruby
 x = -1;
