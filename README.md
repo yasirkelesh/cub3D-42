@@ -1,5 +1,6 @@
 # Ray-Casting
 
+
 Raycasting'i uygulamak için kullandığım formülleri burada açıklayacağım. Bu raycast, Cub3D adlı 3D bir oyun oluşturmak için yapılmıştır. Proje hala devam etmektedir ⚙️🛠.
 
 Not: Henüz tuşlarla ilgili bitmiş değilim .. Ve evet, oyuncu duvarların içinden geçebilir 🧟‍♀️
